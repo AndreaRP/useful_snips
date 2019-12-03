@@ -20,8 +20,10 @@ pdftk A=/home/arubio/Documents/Doctorado/plan_investigacion_final.pdf B=/home/ar
 
 # Copy a file maintaining directory structure (from /run/user/10601/gvfs/smb-share:server=tierra.cnic.es,share=sc/LAB_AH/LAB/Andrea/Ivan_Neutrophils_circadian_BM/PROCESSED)
 find . -name '*.genes.results' -exec cp --parents \{} /data3/arubio/projects/Ivan_Neutrophils_circadian_BM/PROCESSED/ \;
-
 find . \( -name "*.Rmd" -or -name "*.R" \) -exec cp --parents \{\} ./backup/ \;
+
+# Copy without folder structure
+find . -name '*.fastq.gz' -exec cp {} /data3/arubio/projects/Tissue_Neutrophils_scRNAseq/geo/raw/ \;
 
 
 ########### GIT ############
