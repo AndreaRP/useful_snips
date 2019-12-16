@@ -25,6 +25,10 @@ find . \( -name "*.Rmd" -or -name "*.R" \) -exec cp --parents \{\} ./backup/ \;
 # Copy without folder structure
 find . -name '*.fastq.gz' -exec cp {} /data3/arubio/projects/Tissue_Neutrophils_scRNAseq/geo/raw/ \;
 
+# Change file names in batch
+ls | while read file; do newfile=`echo $file | awk -F . '{print $1 "_" $9 ".fastq.gz"}'`; echo $newfile;  mv $file $newfile; done;
+
+
 
 ########### GIT ############
 # Initialize repo in folder
