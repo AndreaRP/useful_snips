@@ -1,6 +1,11 @@
 ###################### capitalize first letter ########################## 
 tools::toTitleCase()
 
+
+###################### Convert gene aliases to official symbol ########################## 
+chemokines <- limma::alias2Symbol(tools::toTitleCase(tolower(chemokines_file$Chemokine)), species="Mm")
+
+
 ###################### Simulate gene expression counts counts ########################## 
 #' @param G number of groups
 #' @param N number of cells per group
