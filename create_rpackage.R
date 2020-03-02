@@ -42,3 +42,22 @@ document()
 setwd("..")
 install("ArpyLib")
 library("ArpyLib")
+
+
+
+library("devtools")
+# devtools::install_github("klutometis/roxygen")
+library("roxygen2")
+# Step 1: Create your package directory
+setwd("/home/arubio/Dropbox/")
+# usethis::create_package("CircaN")
+# Step 2: Add functions to the R folder.
+setwd("./CircaN/")
+document()
+
+# Step 5: Install!
+# Now it is as simple as installing the package! You need to run this from the parent working directory that contains the cats folder.
+setwd("..")
+install("CircaN")
+library("CircaN")
+

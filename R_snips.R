@@ -1,12 +1,12 @@
-###################### capitalize first letter ########################## 
+###################### capitalize first letter ##########################
 tools::toTitleCase()
 
 
-###################### Convert gene aliases to official symbol ########################## 
+###################### Convert gene aliases to official symbol ##########################
 chemokines <- limma::alias2Symbol(tools::toTitleCase(tolower(chemokines_file$Chemokine)), species="Mm")
 
 
-###################### Simulate gene expression counts counts ########################## 
+###################### Simulate gene expression counts counts ##########################
 #' @param G number of groups
 #' @param N number of cells per group
 #' @param M number of genes
@@ -21,22 +21,22 @@ simulate.data <- function(G=5, N=30, M=100, initmean=0, initvar=10, upreg=10, up
   rownames(mat) <- paste0('gene', 1:M)
   colnames(mat) <- paste0('cell', 1:(N*G))
   group <- factor(sapply(1:G, function(x) rep(paste0('group', x), N)))
-  
+
   diff <- lapply(1:G, function(x) {
     diff <- rownames(mat)[(((x-1)*ng)+1):(((x-1)*ng)+ng)]
     mat[diff, group==paste0('group', x)] <<- mat[diff, group==paste0('group', x)] + rnorm(ng, upreg, upregvar)
     return(diff)
   })
   names(diff) <- paste0('group', 1:G)
-  
+
   mat[mat<0] <- 0
   mat <- round(mat)
-  
+
   return(list(cd=mat, group=group))
 }
 data <- simulate.data()
 
-###################### Read excel file ########################## 
+###################### Read excel file ##########################
 library("xlsx")
 # Read signatures
 lavin <- read.xlsx("./DOC/Lavin_1-s2.0-S0092867414014494-mmc2.xlsx", sheetName = "Table S1", startRow = 5)
@@ -51,9 +51,9 @@ lavin.microglia <- unique(t2g[which(tolower(as.character(t2g$ext_gene)) %in% lav
 lavin.spleen <- unique(t2g[which(tolower(as.character(t2g$ext_gene)) %in% lavin.spleen), "ens_gene"])
 lavin.lung <- unique(t2g[which(tolower(as.character(t2g$ext_gene)) %in% lavin.lung), "ens_gene"])
 
-# Prune signatures (min 15 genes. max 500). 
+# Prune signatures (min 15 genes. max 500).
 # As it is already sorted by expression in microglia we keep the first 500
-lavin.microglia <- lavin.microglia[1:500] 
+lavin.microglia <- lavin.microglia[1:500]
 
 data <- as.data.frame(exprs)
 data$Name <- rownames(data)
@@ -71,7 +71,7 @@ fileConn <- file("./RESULTS/GSEA/-lung3_neutrophils_tissue_expression_gsea.cls")
 writeLines(c(line1,line2,line3), fileConn)
 close(fileConn)
 
-# Create GMT file for GSEA 
+# Create GMT file for GSEA
 # First column are gene sets names, second column contains a brief description
 # The rest of columns contains one of the genes in the set.
 line1 <- paste(c("Microglia_Lavin", "Lavin Microglia MF signature genes"
@@ -85,22 +85,26 @@ fileConn <- file("./RESULTS/GSEA/-lung3_neutrophils_tissue_signatures_gsea.gmt")
 writeLines(c(line1,line2, line3), fileConn)
 close(fileConn)
 
-###################### Get pheatmap row ordering ###################### 
+###################### Get pheatmap row ordering ######################
 row_order <- hm$tree_row$order
 
-###################### Color gradients with n intercolors ########################## 
+
+###################### Transform to reg exp ######################
+glob2rx('Andy*')
+
+###################### Color gradients with n intercolors ##########################
 n=12
 colfunc<-colorRampPalette(c("#053061","gray48","#67001F"))
 hmcol <- colfunc(n)
 plot(rep(1,length(hmcol)),col=(colfunc(length(hmcol))), pch=19,cex=2)
 # col2rgb(hmcol)
-###################### Create named vecor ########################## 
+###################### Create named vecor ##########################
 setNames(1:3, c("a", "b", "c"))
 
-###################### Rename columns ########################## 
+###################### Rename columns ##########################
 t2g <- dplyr::rename(t2g, target_id = ensembl_transcript_id,
                      ens_gene = ensembl_gene_id, ext_gene = external_gene_name)
-###################### Sort vector by another vector ###################### 
+###################### Sort vector by another vector ######################
 x <- c(2, 2, 3, 4, 1, 4, 4, 3, 3)
 y <- c(4, 2, 1, 3)
 x[order(match(x,y))]
@@ -110,19 +114,19 @@ order <- tolower(unique(s2c$tissue)) #(order)
 column <- matrix$tissue[which(matrix$tissue %in% order)]
 matrix <- matrix[order(match(column,order)),]
 
-###################### Group descriptions by field ########################## 
+###################### Group descriptions by field ##########################
 t2g.annot <- ddply(t2g.annot, .(ens_gene, ext_gene), summarize, mgi_description = paste(toString(paste(mgi_symbol, ": ", mgi_description, sep=""))))
 
-###################### Get n top genes by column ###################### 
+###################### Get n top genes by column ######################
 top10 <- as.data.frame(exprs %>% group_by(tissue) %>% top_n(10, means)) #(dplyr)
 
-###################### Group rows by column and get mean ###################### 
+###################### Group rows by column and get mean ######################
 r <- as.data.frame(results %>% group_by(Gene, Sample.Name) %>% summarise(average = mean(Ct))) #(dplyr)
 
-###################### Exclude items that match regex ########################### 
+###################### Exclude items that match regex ###########################
 data[,which(!grepl("Blood", colnames(data)))]
 
-###################### Intersection ########################## 
+###################### Intersection ##########################
 Reduce(intersect, list(a,b,c))
 Reduce(intersect, list(sig.intestine, sig.skin, sig.brain, sig.lung))
 
@@ -132,6 +136,8 @@ array.data %>% dplyr::select(col_n, col_x, everything()) # Moves both to the beg
 
 ###################### Calculate means of several columns by group ###########
 df.annot <- aggregate(df[, c("col_1", "col2")], list(df$GeneSymbol), mean)
+# Mean column By group
+aggregate(d[, 3:4], list(d$Name), mean)
 
 ###################### Select df minus some columns by name ###############
 df <- subset(df, select=-c(amp,per,phase))
@@ -140,57 +146,57 @@ A <- A[setdiff(rownames(A), "RA"), ]
 ###################### Select df minus some rows by column content ###############
 s2c_parabiont <- s2c_parabiont[!s2c_parabiont$tissue %in% c("Intestine", "Skin"),]
 
-###################### change column types ###################### 
+###################### change column types ######################
 df[, 1:6] <- sapply(df[, 1:6], as.numeric)
 
-###################### Ordering ###################### 
+###################### Ordering ######################
 column.order.all <- as.character(s2c_all[with(s2c_all, order(batch, rev(depletion), time)),"sample"])
 column.order.all <- s2c_filter_all[order(s2c_filter_all$method, -xtfrm(s2c_filter_all$depletion), s2c_filter_all$time), "sample"]
 
-###################### Accessing the 5th element of a list of a splitted list ###################### 
+###################### Accessing the 5th element of a list of a splitted list ######################
 sapply(strsplit(s2c$file, "_|\\."), "[[", 5)
 
-###################### Access string between two strings ###################### 
+###################### Access string between two strings ######################
 regmatches(v,regexec("STR1(.*?)STR2",v))
 
 ###################### Select columns by several patterns ########################
 reps_to_subset <- paste(paste("rep", c(1:3), sep=""), collapse='|')
 exprs <- exprs[,grep(reps_to_subset, colnames(exprs), value=T)]
 
-###################### Split list into chunks of k elements ###################### 
+###################### Split list into chunks of k elements ######################
 n <- length(probes)
 k <- 10000
-probe_split <- split(probes, rep(1:ceiling(n/k), each=k)[1:n])  
+probe_split <- split(probes, rep(1:ceiling(n/k), each=k)[1:n])
 for (i in names(probe_split)){
   write.table(unlist(probe_split[i]), paste("probe_", i,".txt", sep="")
               , row.names = FALSE, quote = FALSE, col.names = FALSE)
 }
 
-###################### Replace or revalue elements in vector ###################### 
+###################### Replace or revalue elements in vector ######################
 plyr::revalue(y, c(old1 = "new1", old2 = "new2")) # character
 as.numeric(revalue(as.character(data.matrix$clusters.cluster), c("4"="1","1"="2","3"="3","2"="4"))) # numeric
 
-###################### Use rep ###################### 
+###################### Use rep ######################
 rep(1:3, times=6) # 1 2 3 1 2 3 1 2 3 1 2 3 1 2 3 1 2 3
 rep(1:3, each=6) # 1 1 1 1 1 1 2 2 2 2 2 2 3 3 3 3 3 3
 rep(1:3, length.out=6) #  1 2 3 1 2 3
 
-##################### Merge matrix with vector by names ##################### 
+##################### Merge matrix with vector by names #####################
 mat <- matrix(1:9, nrow = 3, ncol = 3)
 rownames(mat) <- c("A", "B", "C")
 vec <- c("B"=11, "C"=12, "A"=10)
 cbind(mat, vec[match(rownames(mat),names(vec))])
 
 
-###################### ROC curve ###################### 
-# labels is a boolean vector with the actual classification of each case, 
+###################### ROC curve ######################
+# labels is a boolean vector with the actual classification of each case,
 # and scores is a vector of real-valued prediction scores assigned by some classifier.
 simple_roc <- function(labels, scores){
   labels <- labels[order(scores, decreasing=TRUE)]
   data.frame(TPR=cumsum(labels)/sum(labels), FPR=cumsum(!labels)/sum(!labels), labels)
 }
 
-###################### Find percentile 90% ###################### 
+###################### Find percentile 90% ######################
 RawData %>% group_by(SampleDate) %>%
   summarise(p90 = quantile(FecalColiform, probs=0.9, na.rm=TRUE))
 quantile(FecalColiform, probs=0.9, na.rm=TRUE)
@@ -199,16 +205,16 @@ quantile(FecalColiform, probs=0.9, na.rm=TRUE)
 ###################### Reverse strings ######################
 strReverse <- function(x) sapply(lapply(strsplit(x, NULL), rev), paste, collapse="")
 
-###################### Plot PCA manually ###################### 
+###################### Plot PCA manually ######################
 df_pca <- prcomp(t(norm.counts[,1:n.samples]))
 plot(df_pca$x[,1], df_pca$x[,2])
 
 #### Al way (plot several)
-library("ggplot2") 
+library("ggplot2")
 library("dplyr")
 library("tidyr")
 
-gatherpairs <- function(data, ..., 
+gatherpairs <- function(data, ...,
                         xkey = '.xkey', xvalue = '.xvalue',
                         ykey = '.ykey', yvalue = '.yvalue',
                         na.rm = FALSE, convert = FALSE, factor_key = FALSE) {
@@ -217,11 +223,11 @@ gatherpairs <- function(data, ...,
   xvalue <- enquo(xvalue)
   ykey <- enquo(ykey)
   yvalue <- enquo(yvalue)
-  
+
   data %>% {
     cbind(gather(., key = !!xkey, value = !!xvalue, !!!vars,
                  na.rm = na.rm, convert = convert, factor_key = factor_key),
-          dplyr::select(., !!!vars)) 
+          dplyr::select(., !!!vars))
   } %>% gather(., key = !!ykey, value = !!yvalue, !!!vars,
                na.rm = na.rm, convert = convert, factor_key = factor_key)
 }
@@ -234,11 +240,11 @@ mydata <- merge(mydata, s2c[,c("sample", "gender", "group", "QC")], by="sample")
 temp <- mydata %>% gatherpairs(PC1, PC2, PC3, PC4, PC5)
 # Eliminate dups
 temp <- temp[-which(temp$.xkey==temp$.ykey),]
-# mydata %>% 
+# mydata %>%
 #   gatherpairs(PC1, PC2, PC3, PC4, PC5)
 temp %>% {
   ggplot(., aes(x = .xvalue, y = .yvalue, color = group, shape=gender)) +
-    geom_point() + 
+    geom_point() +
     # geom_smooth(method = 'lm') +
     facet_grid(.xkey ~ .ykey
                # , ncol = length(unique(.$.ykey))
@@ -259,7 +265,7 @@ temp %>% {
     )
 }
 
-###################### Kable ###################### 
+###################### Kable ######################
 kable(s2c, col.names = colnames(s2c), row.names = F , "latex", booktabs = T) %>%
   kable_styling(latex_options = "HOLD_position")
 
@@ -267,7 +273,7 @@ kable(s2c, col.names = colnames(s2c), row.names = F , "latex", booktabs = T) %>%
 p <- matrix(c(1,2,3,4,1,5,6,2,5,5,7,1), nrow=4,ncol=3)
 t(t(p)/c(1,2,3))
 
-###################### Monitor memory ###################### 
+###################### Monitor memory ######################
 Rprof(tf <- "rprof.log", memory.profiling=TRUE)
 # [your code]
 norm(1:20)
@@ -275,7 +281,7 @@ sample(1:100, 3, replace=TRUE)
 Rprof(NULL)
 summaryRprof(tf)
 
-###################### Venn diagram ###################### 
+###################### Venn diagram ######################
 library("venn")
 tissues <- list(bm=rownames(bm.sig)
                 , blood=rownames(bl.sig)
@@ -290,7 +296,7 @@ tissue.sig <- venn(x=tissues
 intersections <- attr(tissue.sig,"intersections")
 bm.sig <- bm.sig[intersections$bm,]
 
-###################### Pheatmap ###################### 
+###################### Pheatmap ######################
 # Get row order
 nls_only_order <- nls_hm$tree_row$order
 nls_only_order <- rownames(nls_only[nls_only_order,])
@@ -299,7 +305,7 @@ hm_bm_kmeans[["gtable"]]
 # Convert to ggplot
 ggplotify::as.ggplot(all_hm[["gtable"]])
 
-###################### ggplot color palette ###################### 
+###################### ggplot color palette ######################
 gg_color_hue <- function(n) {
   hues = seq(15, 375, length = n + 1)
   hcl(h = hues, l = 65, c = 100)[1:n]
@@ -341,7 +347,7 @@ contrast_cols <- c("#800000" # Maroon
                  , "#e6beff" # Lavender
                    )
 
-###################### Package version ###################### 
+###################### Package version ######################
 packageVersion("Seurat")
 
 capitalize <- function(x) {

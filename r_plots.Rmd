@@ -1,0 +1,169 @@
+---
+title: "Algorithm testing on real data"
+author: "Andrea"
+date: "`r format(Sys.time(), '%d/%m/%Y')`"
+output: 
+  html_document: 
+    dev: pdf
+    fig_caption: yes
+    toc: true
+    toc_depth: 3
+    toc_float: true
+    number_sections: true
+    df_print: paged
+    code_folding: hide
+documentclass: article
+urlcolor: blue
+classoption: a4paper
+header-includes:
+- \usepackage{graphicx}
+- \usepackage{float}
+knit: (function(inputFile, encoding) {
+  rmarkdown::render(inputFile, encoding = encoding, output_dir = "../reports/bio_data")})
+---
+
+```{r setup}
+# Functions, Constants and graphical variables      
+knitr::opts_knit$set(root.dir = "/data3/arubio/projects/Andrea_CircaN_rebuttal/")
+knitr::opts_chunk$set(
+	fig.align = "center",
+	fig.path = "../reports/bio_data/figures/",
+	fig.pos = "H",
+	message = FALSE,
+	warning = FALSE,
+	dev = c("png"),
+	dpi = 500,
+	root.dir = "/data3/arubio/projects/Andrea_CircaN_rebuttal/"
+)
+```
+
+
+<style>
+.column-left{
+  float: left;
+  width: 50%;
+  text-align: left;
+}
+.column-right{
+  float: right;
+  width: 50%;
+  text-align: left;
+}
+</style>
+
+
+```{r libraries, fig.show='hide'}
+# devtools::install_github("AndreaRP/ArpyLib")
+library("ArpyLib")
+library("ggplot2")
+library("ggforce")
+library("cowplot")
+library("pheatmap")
+library("edgeR")
+library("dplyr")
+```
+
+
+
+```{r graphical_parameters}
+colors <- c("#1B9E77", "#D95F02", "#7570B3")
+names(colors) <- c("CircaN", "meta2d", "circan_old")
+blank_background <- theme(panel.grid.major = element_blank()
+                        , panel.grid.minor = element_blank()
+                        , panel.background = element_blank())
+hmcol <- RColorBrewer::brewer.pal(11,"RdBu")
+hmcol <- rev(hmcol) # Invert Red and Blue
+```
+
+
+# Dot plot
+
+```{r}
+library(ggplot2)
+data(mpg, package="ggplot2")
+# mpg <- read.csv("http://goo.gl/uEeRGu")
+
+mpg_select <- mpg[mpg$manufacturer %in% c("audi", "ford", "honda", "hyundai"), ]
+
+# Scatterplot
+theme_set(theme_bw())  # pre-set the bw theme.
+g <- ggplot(mpg_select, aes(displ, cty)) + 
+  labs(subtitle="mpg: Displacement vs City Mileage",
+       title="Bubble chart")
+
+g + geom_jitter(aes(col=manufacturer, size=hwy)) + 
+  geom_smooth(aes(col=manufacturer), method="lm", se=F)
+```
+
+# Violin plot
+
+```{r }
+score.min <- min(tsnedummy[,chemokines])
+score.max <- max(tsnedummy[,chemokines])
+
+score.breaks <- c(score.min, score.max)
+score.labels <- c(round(score.min,7), round(score.max,7))
+
+quant_color_scale <- scale_color_gradientn(colours = gradient.colors
+                    , guide = guide_colourbar(barheight=0.5, label.vjust=-1)
+                    , limits=c(score.min, score.max)
+                    )
+cols <- ArpyLib::gg.cols(length(unique(tsnedummy$cluster)))
+```
+
+## One gene in different clusters
+
+```{r}
+vln_temp <- ggplot(tsnedummy, aes(x=cluster, y=tsnedummy[,gene], fill = cluster, color=cluster)) +
+              geom_violin() +
+              geom_jitter(shape=16, position=position_jitter(width=0.2, height=0)) +
+              stat_summary(fun.y=mean, geom="point", size=2, color="black") +
+              scale_fill_manual(values=cols) +
+              scale_color_manual(values=cols) +
+              theme(axis.text.x=element_text(size=10, angle=90,hjust=0.95,vjust=0.2)) +
+              ylab("log(10K) TPM") +
+              ylim(0, score.max) +
+              ggtitle(gene) +
+              blank_background +
+              theme(axis.text=element_text(size=8)
+                    , axis.title=element_text(size=8)
+                    , legend.text=element_text(size=7)
+                    , legend.position="none"
+                    , legend.title = element_blank()
+                    , axis.line=element_line(color="grey90")
+                    , panel.border = element_blank())
+```
+
+## One cluster, different genes
+
+```{r}
+temp <- tsnedummy[which(tsnedummy$cluster==c),]
+z <- reshape2::melt(temp, measure.vars = chemokines, id.vars = c("tSNE_1", "tSNE_2"))
+vln_temp_c <- ggplot(z, aes(x=variable, y=value, fill = variable, color=variable)) +
+            geom_violin() +
+            geom_jitter(shape=16, position=position_jitter(width=0.2, height=0)) +
+            stat_summary(fun.y=mean, geom="point", size=2, color="black") +
+            # scale_fill_manual(values=cols) +
+            # scale_color_manual(values=cols) +
+            theme(axis.text.x=element_text(size=10, angle=90,hjust=0.95,vjust=0.2)) +
+            ylab("log(10K) TPM") +
+            xlab("Gene") +
+            ylim(0, score.max) +
+            ggtitle(c) +
+            blank_background +
+            theme(axis.text=element_text(size=8)
+                , axis.title=element_text(size=8)
+                , legend.text=element_text(size=7)
+                , legend.position="none"
+                , legend.title = element_blank()
+                , axis.line=element_line(color="grey90")
+                , panel.border = element_blank())
+```
+
+
+# Session info
+
+```{r}
+xfun::session_info()
+```
+
