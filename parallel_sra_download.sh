@@ -12,9 +12,8 @@ echo "Nº cores used: $jobs_n"
 
 
 cmd="fastq-dump --outdir '${home_dir}/data/subsampling/' {1}"
-#parallel --jobs ${jobs_n} --joblog ${home_dir}/jobs.log eval $cmd :::: ${srr_file}
-
-parallel --jobs ${jobs_n} --joblog ${home_dir}/jobs.log echo $cmd :::: ${srr_file}
+parallel --jobs ${jobs_n} --joblog ${home_dir}/jobs.log eval $cmd :::: ${srr_file}
+#parallel --jobs ${jobs_n} --joblog ${home_dir}/jobs.log echo $cmd :::: ${srr_file}
 
 # If I wanted to use 2 different files
 # parallel --jobs ${jobs_n} --joblog ${home_dir}/jobs.log eval $cmd :::: ${file1} :::: ${file2}
