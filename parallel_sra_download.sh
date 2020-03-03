@@ -17,3 +17,9 @@ parallel --jobs ${jobs_n} --joblog ${home_dir}/data/raw/ray_fastq/jobs.log eval 
 
 # If I wanted to use 2 different files
 # parallel --jobs ${jobs_n} --joblog ${home_dir}/jobs.log eval $cmd :::: ${file1} :::: ${file2}
+
+
+# Check if the downloaded files from sra are correct (checks in /home/user/ncbi/*.sra files)
+#for f in *.fastq; do pf=${f%%.fastq}; echo $pf; vdb-validate $pf >> check.txt 2>&1; done
+
+for f in ${home_dir}/data/raw/ray_fastq/*.fastq; do pf=${f%%.fastq}; echo $pf; vdb-validate $pf >> check.txt 2>&1; done
