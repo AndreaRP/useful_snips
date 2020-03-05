@@ -188,6 +188,42 @@ vln_temp_c <- ggplot(z, aes(x=variable, y=value, fill = variable, color=variable
                 , panel.border = element_blank())
 ```
 
+# UpSet plot
+
+```{r}
+algorithms <- list(CircaN=as.character(circan_results[which(circan_results$BH_combined<0.05 & circan_results$r>=0.7), "feature"])
+                  , LS=as.character(ls_results[which(ls_results$LS_BH.Q<0.05), "CycID"])
+                  , MetaCycle=as.character(metacycle_results[which(metacycle_results$meta2d_BH.Q<0.05), "CycID"])
+                  , JTK=as.character(results_jtk[which(results_jtk$BH.Q<0.05), "Probeset"])
+                )
+
+library("UpSetR")
+upset(fromList(algorithms)
+    , order.by = c("degree")
+    , queries = list(list(query = intersects , params = list("CircaN"), color = "orchid3", active = T)
+                   # , list(query = intersects, params = list("LS"), color = "firebrick3", active = T)
+                   , list(query = intersects, params = list("MetaCycle"), color = "seagreen3", active = T)
+                   , list(query = intersects, params = list("JTK"), color = "dodgerblue", active = T)
+                   )
+      , keep.order = T
+      , nintersects = NA
+      )
+```
+
+# Venn Diagram
+
+```{r}
+algorithms_i <- venn::venn(x=algorithms
+                 , ilab=TRUE
+                 , zcolor = "style"
+                 , intersections=T
+                 , show.plot=F)
+intersections <- attr(algorithms_i,"intersections")
+
+fitzgerald_data_wt_circan <- fitzgerald_data_wt[intersections$CircaN, fitzgerald_meta_wt$sample]
+fitzgerald_data_wt_mc_jtk <- fitzgerald_data_wt[intersections$`MetaCycle:JTK`, fitzgerald_meta_wt$sample]
+```
+
 
 # Session info
 
