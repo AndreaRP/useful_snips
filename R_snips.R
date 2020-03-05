@@ -136,8 +136,11 @@ array.data %>% dplyr::select(col_n, col_x, everything()) # Moves both to the beg
 
 ###################### Calculate means of several columns by group ###########
 df.annot <- aggregate(df[, c("col_1", "col2")], list(df$GeneSymbol), mean)
-# Mean column By group
-aggregate(d[, 3:4], list(d$Name), mean)
+# % of non-zero values
+p <- aggregate(melt_expr[,"expression"], list(melt_expr$cluster, melt_expr$gene), function(x) sum(x != 0)/length(x))
+
+###################### melt data ###################### 
+melt_expr <- reshape2::melt(expr, id.vars=c("cluster", "tissue"))
 
 ###################### Select df minus some columns by name ###############
 df <- subset(df, select=-c(amp,per,phase))

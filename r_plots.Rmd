@@ -79,21 +79,49 @@ hmcol <- rev(hmcol) # Invert Red and Blue
 # Dot plot
 
 ```{r}
-library(ggplot2)
-data(mpg, package="ggplot2")
-# mpg <- read.csv("http://goo.gl/uEeRGu")
-
-mpg_select <- mpg[mpg$manufacturer %in% c("audi", "ford", "honda", "hyundai"), ]
-
-# Scatterplot
-theme_set(theme_bw())  # pre-set the bw theme.
-g <- ggplot(mpg_select, aes(displ, cty)) + 
-  labs(subtitle="mpg: Displacement vs City Mileage",
-       title="Bubble chart")
-
-g + geom_jitter(aes(col=manufacturer, size=hwy)) + 
-  geom_smooth(aes(col=manufacturer), method="lm", se=F)
+expr <- as.data.frame(t(as.matrix(GetAssayData(object = neutrophils_subset))[selected_genes,]))
+expr$cluster <- neutrophils_subset@meta.data$unbiased_clustering
+expr$tissue <- neutrophils_subset@meta.data$tissue
+melt_expr <- reshape2::melt(expr, id.vars=c("cluster", "tissue")
+                          , value.name="expression", variable.name=c("gene"))
+# Get mean expression by cluster
+dot_plot_data <- setNames(aggregate(melt_expr[,"expression"], list(melt_expr$cluster, melt_expr$gene), mean)
+                        , c("cluster", "gene", "mean"))
+# Get %of cells per cluster that express the gene
+p <- aggregate(melt_expr[,"expression"], list(melt_expr$cluster, melt_expr$gene), function(x) sum(x != 0)/length(x))
+dot_plot_data$pct_expression <- p$x
 ```
+
+
+```{r}
+ggplot(dot_plot_data, aes(x=gene, y=cluster, size = mean, color=cluster, alpha=pct_expression)) +
+    # geom_point(alpha=0.7) +
+    geom_point() +
+    scale_size(range = c(.1, 15), name="Cluster mean") +
+    theme(axis.text.x=element_text(size=10, angle=90, hjust=0.95, vjust=0.2)) +
+    blank_background +
+    scale_alpha(name = "% Expression") +
+    scale_colour_discrete(guide=FALSE)
+```
+
+
+```{r}
+ggplot(dot_plot_data, aes(x=gene, y=cluster, size = pct_expression, color=mean)) +
+    # geom_point(alpha=0.7) +
+    geom_point() +
+    scale_size(range = c(.1, 7)
+             , name="Pct exp"
+             # , breaks=c(0, 1, 2)
+             ) +
+    scale_color_gradientn(colours = gradient.colors
+                        , guide = guide_colourbar(barheight=3, barwidth = 0.5)
+                        , name="Mean") +
+    theme(axis.text.x=element_text(size=10, angle=90, hjust=0.95, vjust=0.2)
+        , axis.title.x=element_blank()
+          ) +
+    blank_background 
+```
+
 
 # Violin plot
 
@@ -126,12 +154,12 @@ vln_temp <- ggplot(tsnedummy, aes(x=cluster, y=tsnedummy[,gene], fill = cluster,
               ggtitle(gene) +
               blank_background +
               theme(axis.text=element_text(size=8)
-                    , axis.title=element_text(size=8)
-                    , legend.text=element_text(size=7)
-                    , legend.position="none"
-                    , legend.title = element_blank()
-                    , axis.line=element_line(color="grey90")
-                    , panel.border = element_blank())
+                  , axis.title=element_text(size=8)
+                  , legend.text=element_text(size=7)
+                  , legend.position="none"
+                  , legend.title = element_blank()
+                  , axis.line=element_line(color="grey90")
+                  , panel.border = element_blank())
 ```
 
 ## One cluster, different genes
