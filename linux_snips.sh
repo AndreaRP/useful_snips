@@ -28,6 +28,8 @@ find . -name '*.fastq.gz' -exec cp {} /data3/arubio/projects/Tissue_Neutrophils_
 # Change file names in batch
 ls | while read file; do newfile=`echo $file | awk -F . '{print $1 "_" $9 ".fastq.gz"}'`; echo $newfile;  mv $file $newfile; done;
 
+# Unzip only specific files
+find . -name "*.zip" -type f -exec unzip -jd "raw/" "{}" "*.fastq.gz" "*.gif" \;
 
 
 ########### GIT ############

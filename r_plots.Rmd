@@ -168,24 +168,24 @@ vln_temp <- ggplot(tsnedummy, aes(x=cluster, y=tsnedummy[,gene], fill = cluster,
 temp <- tsnedummy[which(tsnedummy$cluster==c),]
 z <- reshape2::melt(temp, measure.vars = chemokines, id.vars = c("tSNE_1", "tSNE_2"))
 vln_temp_c <- ggplot(z, aes(x=variable, y=value, fill = variable, color=variable)) +
-            geom_violin() +
-            geom_jitter(shape=16, position=position_jitter(width=0.2, height=0)) +
-            stat_summary(fun.y=mean, geom="point", size=2, color="black") +
-            # scale_fill_manual(values=cols) +
-            # scale_color_manual(values=cols) +
-            theme(axis.text.x=element_text(size=10, angle=90,hjust=0.95,vjust=0.2)) +
-            ylab("log(10K) TPM") +
-            xlab("Gene") +
-            ylim(0, score.max) +
-            ggtitle(c) +
-            blank_background +
-            theme(axis.text=element_text(size=8)
-                , axis.title=element_text(size=8)
-                , legend.text=element_text(size=7)
-                , legend.position="none"
-                , legend.title = element_blank()
-                , axis.line=element_line(color="grey90")
-                , panel.border = element_blank())
+              geom_violin() +
+              geom_jitter(shape=16, position=position_jitter(width=0.2, height=0)) +
+              stat_summary(fun.y=mean, geom="point", size=2, color="black") +
+              # scale_fill_manual(values=cols) +
+              # scale_color_manual(values=cols) +
+              theme(axis.text.x=element_text(size=10, angle=90,hjust=0.95,vjust=0.2)) +
+              ylab("log(10K) TPM") +
+              xlab("Gene") +
+              ylim(0, score.max) +
+              ggtitle(c) +
+              blank_background +
+              theme(axis.text=element_text(size=8)
+                  , axis.title=element_text(size=8)
+                  , legend.text=element_text(size=7)
+                  , legend.position="none"
+                  , legend.title = element_blank()
+                  , axis.line=element_line(color="grey90")
+                  , panel.border = element_blank())
 ```
 
 # UpSet plot
@@ -209,6 +209,7 @@ upset(fromList(algorithms)
       , nintersects = NA
       )
 ```
+
 
 # Venn Diagram
 
