@@ -226,6 +226,69 @@ fitzgerald_data_wt_mc_jtk <- fitzgerald_data_wt[intersections$`MetaCycle:JTK`, f
 ```
 
 
+# Histogram
+
+```{r}
+temp_1 <- ggplot(dat, aes(x=qvalues)) +
+                geom_histogram(binwidth=0.02, colour="black", fill="white") +
+                xlim(0, 1.02) +
+                ggtitle(paste(a, sep="_")) +
+                theme(plot.title = element_text(size = 8, face = "bold")) +
+                blank_background
+
+
+temp <- ggplot(dat, aes(x=qvalues)) + 
+        geom_histogram(aes(y=..density..),      # Histogram with density instead of count on y-axis
+                       binwidth=.02,colour="black", fill="white") +
+        geom_density(alpha=.2, fill="#FF6666") +
+        xlim(0, 1.02) +
+        ggtitle(paste(a, sep="_")) +
+        theme(plot.title = element_text(size = 8, face = "bold")) +
+        blank_background
+```
+
+
+# t-sne
+
+## Group
+
+```{r}
+plot_order <- c("BM", "PBZT5", "Colon", "Spleen", "Lung")
+p <- tempdummy[order(match(tempdummy$tissue, plot_order)),]
+p1 <- ggplot(data=p) +
+      geom_point(aes(x=tSNE_1, y=tSNE_2
+                 , colour=tissue
+                 )
+             , size = 1) +
+    scale_colour_manual(values=celltype_tissue_cols) +
+    labs(x="t-SNE 1", y="t-SNE 2") + 
+    ggtitle("Tissue") + 
+    guides(colour = guide_legend(override.aes = list(size=3))) + 
+    theme(axis.text=element_text(size=8)
+        , axis.title=element_text(size=8)
+        , legend.text=element_text(size=7)
+        , legend.position="bottom"
+        , legend.title = element_blank()
+        , axis.line=element_line(color="grey90")
+        , panel.border = element_blank())
+
+# Separate legend
+temp <- ggplot(data=tsnedummy) +
+        geom_point(aes(x=tSNE_1, y=tSNE_2, colour=Phase), size = 1)
+legend <- get_legend(temp+guides(colour=guide_legend(nrow=2,byrow=TRUE,override.aes = list(size=4))))
+```
+
+
+# BoxPlot 
+```{r}
+bargraph_fitzgerald_vc <- ggplot(fitzgerald_vc, aes(x="All", y=vc)) +
+                          geom_boxplot(outlier.colour="black", outlier.shape=16, outlier.size=2, notch=FALSE) + 
+                          ggtitle("Fitzgerald all genes") +
+                          theme(plot.title = element_text(size = 8, face = "bold")) +
+                          blank_background
+```
+
+
 # Session info
 
 ```{r}
