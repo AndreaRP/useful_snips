@@ -31,6 +31,9 @@ ls | while read file; do newfile=`echo $file | awk -F . '{print $1 "_" $9 ".fast
 # Unzip only specific files
 find . -name "*.zip" -type f -exec unzip -jd "raw/" "{}" "*.fastq.gz" "*.gif" \;
 
+# Find only file names
+find . -name '*.fastq.gz' -type f -printf "%f\n"
+
 
 ########### GIT ############
 # Initialize repo in folder
