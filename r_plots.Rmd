@@ -188,6 +188,78 @@ vln_temp_c <- ggplot(z, aes(x=variable, y=value, fill = variable, color=variable
                   , panel.border = element_blank())
 ```
 
+## Several genes faceted by cluster
+
+```{r}
+tsnedummy_hscs <- tsnedummy[tsnedummy$hscs_14_score>0,]
+z <- reshape2::melt(tsnedummy_hscs, measure.vars = other_gene_list, id.vars = c("cell", "tissue"))
+score_max <- max(tsnedummy_hscs[, other_gene_list])
+
+cols <- ArpyLib::gg_cols(length(unique(tsnedummy$tissue)))
+vln_temp <- ggplot(z, aes(x=tissue, y=value
+                  , fill = tissue, color=tissue)) +
+              geom_violin() +
+              geom_jitter(shape=16, position=position_jitter(width=0.2, height=0)) +
+              stat_summary(fun.y=mean, geom="point", size=2, color="black") +
+              scale_fill_manual(values=cols) +
+              scale_color_manual(values=cols) +
+              theme(axis.text.x=element_text(size=10, angle=90,hjust=0.95,vjust=0.2)) +
+              ylab("log(10K) TPM") +
+              ylim(0, score_max) +
+              # ggtitle(gene) +
+              blank_background +
+              theme(axis.text=element_text(size=8)
+                  , axis.title=element_text(size=8)
+                  , legend.text=element_text(size=7)
+                  , legend.position="none"
+                  , legend.title = element_blank()
+                  , axis.line=element_line(color="grey90")
+                  , panel.border = element_blank()) +
+  facet_grid(. ~ variable)
+```
+
+```{r}
+# version mas cuqui
+tsnedummy_hscs <- tsnedummy[tsnedummy$hscs_14_score>0,]
+z <- reshape2::melt(tsnedummy_hscs, measure.vars = other_gene_list, id.vars = c("cell", "tissue"))
+score_max <- max(tsnedummy_hscs[, other_gene_list])
+z$tissue <- factor(z$tissue, levels = c("BM", "Blood"))
+
+cols <- ArpyLib::gg_cols(length(unique(tsnedummy$tissue)))
+vln_temp <- ggplot(z, aes(x=tissue, y=value
+                  , fill = tissue, color=tissue)) +
+              geom_violin() +
+              geom_jitter(shape=16, position=position_jitter(width=0.2, height=0)) +
+              stat_summary(fun.y=mean, geom="point", size=2, color="black") +
+              scale_fill_manual(values=cols) +
+              scale_color_manual(values=cols) +
+              theme(axis.text.x=element_text(size=10, angle=90,hjust=0.95,vjust=0.2)) +
+              ylab("log(10K) TPM") +
+              xlab("") +
+              ylim(0, score_max) +
+              # ggtitle(gene) +
+              blank_background +
+              theme(axis.text=element_text(size=8)
+                  , axis.title=element_text(size=8)
+                  , legend.text=element_text(size=7)
+                  , axis.text.x = element_blank()
+                  , axis.line.x = element_blank()
+                  , axis.ticks.x = element_blank()
+                  , legend.position="bottom"
+                  , legend.title = element_blank()
+                  , axis.line=element_line(color="grey90")
+                  , panel.border = element_blank()) +
+  facet_grid(. ~ variable
+           , switch="both"
+           ) +
+  # facet_wrap(. ~ variable, strip.position="bottom") +
+  theme(strip.text.x = element_text(size=12, angle=90, face="bold", hjust = 1),
+        # strip.text.y = element_text(size=12, face="bold"),
+        strip.background = element_rect(colour=NA, fill=NA)) +
+  + guides(colour = guide_legend(override.aes = list(shape = NA))) # Quita el punto de la leyenda
+```
+
+
 # UpSet plot
 
 ```{r}
@@ -276,6 +348,37 @@ p1 <- ggplot(data=p) +
 temp <- ggplot(data=tsnedummy) +
         geom_point(aes(x=tSNE_1, y=tSNE_2, colour=Phase), size = 1)
 legend <- get_legend(temp+guides(colour=guide_legend(nrow=2,byrow=TRUE,override.aes = list(size=4))))
+```
+
+## Expression
+
+```{r}
+gradient.colors <- colorRampPalette(c("grey"
+                                     ,"orange"
+                                     ,"red"))(3)
+
+score.breaks <- c(min(tsnedummy$Mki67), max(tsnedummy$Mki67))
+score.labels <- c(round(min(tsnedummy$Mki67),7), round(max(tsnedummy$Mki67),7))
+
+mki67 <- ggplot(data=tsnedummy) +
+      geom_point(aes(x=tSNE_1, y=tSNE_2
+                     , colour=Mki67
+      ), size = 1) +
+      scale_color_gradientn(colours = gradient.colors
+                            , guide = guide_colourbar(barheight=0.5
+                                                      , label.vjust=-1)
+                            , breaks=score.breaks, labels=score.labels
+                            , limits = score_labels # (to set global scales)
+                            ) +
+      labs(x="t-SNE 1", y="t-SNE 2") + 
+      ggtitle("Mki67") +
+      theme(legend.position="none"
+          , axis.text=element_text(size=8)
+          , axis.title=element_text(size=8)
+          , axis.line=element_line(color="grey90")
+          , panel.border = element_blank()
+          , legend.title=element_blank()
+          , legend.text=element_text(size=7))
 ```
 
 

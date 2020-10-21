@@ -15,6 +15,18 @@ git remote add origin https://github.com/AndreaRP/repo_name
 git push origin master
 
 
+## If I accidentally add files I dont want in my repo I just delete them from 
+## the "following" file by using rm --cached. This removes the files from the repo
+## But not from the local disk!
+git rm -r --cached submission/*.zip
+
+## If the worst happens and you accidentally delete files you wanted to keep
+## by using a hard reset, you can recover them by first localizing the version
+## in which you still had them
+git reflog # Gives you the commits you have made
+## then you can use a hard reset on the version that stilla had the files
+git reset --hard 32f9337
+
 # After set up you just commit and push
 
 # Modify URL of git

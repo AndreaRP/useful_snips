@@ -114,6 +114,10 @@ order <- tolower(unique(s2c$tissue)) #(order)
 column <- matrix$tissue[which(matrix$tissue %in% order)]
 matrix <- matrix[order(match(column,order)),]
 
+################ Replace spaces by line breaks every 30 characters
+gsub("(.{30,}?)\\s", "\\1\n", x)
+
+
 ###################### Group descriptions by field ##########################
 t2g.annot <- ddply(t2g.annot, .(ens_gene, ext_gene), summarize, mgi_description = paste(toString(paste(mgi_symbol, ": ", mgi_description, sep=""))))
 

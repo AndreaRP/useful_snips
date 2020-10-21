@@ -49,7 +49,8 @@ library("devtools")
 # devtools::install_github("klutometis/roxygen")
 library("roxygen2")
 # Step 1: Create your package directory
-setwd("/home/arubio/Dropbox/")
+# setwd("/home/arubio/Dropbox/")
+setwd("/data3/arubio/src/")
 # usethis::create_package("CircaN")
 # Step 2: Add functions to the R folder.
 setwd("./CircaN/")
