@@ -381,8 +381,45 @@ mki67 <- ggplot(data=tsnedummy) +
           , legend.text=element_text(size=7))
 ```
 
+## List of genes with separate expression
+
+
+```{r}
+cytoff_prots <- c("Er168Di.CCR2_APC.", "Dy163Di.CD150.", "Er166Di.CD48."
+               , "Yb174Di.CD24.", "Gd157Di.CXCR2.", "Eu153Di.CD11b."
+               , "Nd148Di.Ly6C.", "Eu151Di.CD62L.", "Yb176Di.CD16_32.")
+for(gene in cytoff_prots){
+  tsnedummy_temp <- tsnedummy[order(tsnedummy[,gene]),]
+  tsne_temp <- ggplot(data=tsnedummy_temp) +
+                geom_point(aes(x=tsne_1, y=tsne_2, colour=scale(tsnedummy_temp[,gene]))
+                         , size = 1) +
+                scale_color_gradientn(colours = gradient.colors
+                                    , guide = guide_colourbar(barheight=0.5, label.vjust=-1)) +
+                labs(x="t-SNE 1", y="t-SNE 2") + 
+                ggtitle(gene) +
+                blank_background +
+                theme(axis.text=element_text(size=8)
+                    , axis.title=element_text(size=8)
+                    , legend.text=element_text(size=10)
+                    , legend.position="bottom"
+                    , legend.title = element_blank()
+                    , axis.line=element_line(color="grey90")
+                    , panel.border = element_blank())
+    temp <- plot_grid(tsne_temp)
+    assign(paste("tsne", gene, sep="_"), temp)
+}
+```
+
+
+```{r tsne_cytoff_plots, fig.height=8, fig.width=7}
+plot_grid(plotlist = mget(apply(expand.grid("tsne", cytoff_prots), 1, paste, collapse="_"))
+        , cols = 3
+        )
+```
+
 
 # BoxPlot 
+
 ```{r}
 fitzgerald_vc_p <- ggplot(global_vc, aes(x=group, y=vc, fill=group)) +
                   geom_boxplot(outlier.colour="black", outlier.shape=16, outlier.size=0.5, notch=FALSE) + 
@@ -425,6 +462,44 @@ temp +
   blank_background
 ```
 
+# Curve genes
+
+```{r}
+clock_genes <- c("Arntl", "Cry1", "Cry2", "Per1", "Per2", "Per3", "Nr1d1", "Nr1d2", "Rorc")
+# clock_genes <- t2g_annot[which(t2g_annot$ext_gene %in% clock_genes), c("ens_gene", "ext_gene")]
+clock_genes_expr <- norm_counts_annot[which(norm_counts_annot$ext_gene %in% clock_genes)
+                                    , c(co_meta$sample, cre_neg_meta$sample, cre_pos_meta$sample, "ext_gene")]
+rownames(clock_genes_expr) <- clock_genes_expr$ext_gene
+clock_genes_expr <- clock_genes_expr[,-which(colnames(clock_genes_expr)=="ext_gene")]
+clock_genes_expr <- as.data.frame(t(clock_genes_expr))
+clock_genes_expr <- cbind(clock_genes_expr
+                        , "group"=c(rep("CO", nrow(co_meta))
+                                  , rep("Cre-", nrow(cre_neg_meta))
+                                  , rep("Cre+", nrow(cre_pos_meta)))
+                        , "time"=c(co_meta$time, cre_neg_meta$time, cre_pos_meta$time)
+                        )
+clock_melt <- reshape2::melt(clock_genes_expr
+                           , measure.vars = clock_genes
+                           , variable.name = "gene"
+                           , value.name = "expression"
+                           , id.vars = c("group", "time")
+                            )
+```
+
+
+
+```{r clock_genes, fig.width=10, fig.height=9}
+ggplot(data = clock_melt, aes(x = time, y = expression, group = group, colour=group)) +
+    geom_line(aes(linetype = group), size = 1) + 
+    scale_color_manual(values=c("CO"="#00BA38", "Cre-"="#F8766D", "Cre+"="#619CFF")) +
+    facet_wrap(~gene, scales = "free") +
+    blank_background +
+    theme(strip.text.x = element_text(
+          size = 12, color = "black", face = "bold")
+        # , strip.text.y = element_text(size = 12, color = "black", face = "bold.italic")
+        , strip.background = element_rect(color="NA", fill="NA", size=3)
+          )
+```
 
 # Session info
 

@@ -31,7 +31,7 @@ library("devtools")
 # devtools::install_github("klutometis/roxygen")
 library("roxygen2")
 # Step 1: Create your package directory
-setwd("/data3/arubio/")
+setwd("/home/arubio/NetVolumes/LAB_AH/LAB/Andrea/")
 # usethis::create_package("CircN")
 # Step 2: Add functions to the R folder.
 setwd("./src/ArpyLib/")
@@ -40,6 +40,7 @@ document()
 # Step 5: Install!
 # Now it is as simple as installing the package! You need to run this from the parent working directory that contains the cats folder.
 setwd("..")
+unloadNamespace("ArpyLib")
 install("ArpyLib")
 library("ArpyLib")
 
